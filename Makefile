@@ -85,13 +85,13 @@ npm-publish: npm-copy-binaries ## Publish the npm packages (uses OIDC trusted pu
 		DIRNAME="$(BINARY_NAME)-$(os)-$(arch)"; \
 		cd npm/$$DIRNAME; \
 		jq '.version = "$(NPM_VERSION)"' package.json > tmp.json && mv tmp.json package.json; \
-		npm publish --access public; \
+		npm publish --access public --provenance; \
 		cd ../..; \
 	))
 	cp README.md LICENSE ./npm/slack-mcp-server/
 	jq '.version = "$(NPM_VERSION)"' ./npm/slack-mcp-server/package.json > tmp.json && mv tmp.json ./npm/slack-mcp-server/package.json; \
 	jq '.optionalDependencies |= with_entries(.value = "$(NPM_VERSION)")' ./npm/slack-mcp-server/package.json > tmp.json && mv tmp.json ./npm/slack-mcp-server/package.json; \
-	cd npm/slack-mcp-server && npm publish --access public
+	cd npm/slack-mcp-server && npm publish --access public --provenance
 
 .PHONY: deps
 deps: ## Download dependencies
