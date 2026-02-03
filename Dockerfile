@@ -1,4 +1,4 @@
-FROM golang:1.26rc2-alpine3.23 AS build-env
+FROM golang:1.25-alpine3.23 AS build-env
 
 WORKDIR /go/src/slack-mcp-server
 
