@@ -11,11 +11,11 @@ concurrency:
 
 env:
   GO_VERSION: 1.25
-  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 permissions:
   contents: write
   discussions: write
+  id-token: write
 
 jobs:
   release:

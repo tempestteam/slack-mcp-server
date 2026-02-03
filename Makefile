@@ -80,20 +80,18 @@ npm-copy-binaries: build-all-platforms ## Copy the binaries to each npm package
 	))
 
 .PHONY: npm-publish
-npm-publish: npm-copy-binaries ## Publish the npm packages
+npm-publish: npm-copy-binaries ## Publish the npm packages (uses OIDC trusted publishing)
 	$(foreach os,$(OSES),$(foreach arch,$(ARCHS), \
 		DIRNAME="$(BINARY_NAME)-$(os)-$(arch)"; \
 		cd npm/$$DIRNAME; \
-		echo '//registry.npmjs.org/:_authToken=$(NPM_TOKEN)' >> .npmrc; \
 		jq '.version = "$(NPM_VERSION)"' package.json > tmp.json && mv tmp.json package.json; \
-		npm publish; \
+		npm publish --access public; \
 		cd ../..; \
 	))
 	cp README.md LICENSE ./npm/slack-mcp-server/
-	echo '//registry.npmjs.org/:_authToken=$(NPM_TOKEN)' >> ./npm/slack-mcp-server/.npmrc
 	jq '.version = "$(NPM_VERSION)"' ./npm/slack-mcp-server/package.json > tmp.json && mv tmp.json ./npm/slack-mcp-server/package.json; \
 	jq '.optionalDependencies |= with_entries(.value = "$(NPM_VERSION)")' ./npm/slack-mcp-server/package.json > tmp.json && mv tmp.json ./npm/slack-mcp-server/package.json; \
-	cd npm/slack-mcp-server && npm publish
+	cd npm/slack-mcp-server && npm publish --access public
 
 .PHONY: deps
 deps: ## Download dependencies
