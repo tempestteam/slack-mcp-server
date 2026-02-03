@@ -3,7 +3,8 @@ name: Release Image
 on:
   push:
     tags:
-      - '*'
+      - 'v*'
+  workflow_dispatch:
 
 env:
   DOCKERHUB_IMAGE_NAME: tempestteam/slack-mcp-server
