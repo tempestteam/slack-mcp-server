@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/korotovsky/slack-mcp-server/pkg/provider"
-	"github.com/korotovsky/slack-mcp-server/pkg/server"
+	"github.com/tempestteam/slack-mcp-server/pkg/provider"
+	"github.com/tempestteam/slack-mcp-server/pkg/server"
 	"github.com/mattn/go-isatty"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -30,7 +30,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer logger.Sync()
+	defer func() { _ = logger.Sync() }()
 
 	err = validateToolConfig(os.Getenv("SLACK_MCP_ADD_MESSAGE_TOOL"))
 	if err != nil {

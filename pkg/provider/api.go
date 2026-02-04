@@ -13,9 +13,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/korotovsky/slack-mcp-server/pkg/limiter"
-	"github.com/korotovsky/slack-mcp-server/pkg/provider/edge"
-	"github.com/korotovsky/slack-mcp-server/pkg/transport"
+	"github.com/tempestteam/slack-mcp-server/pkg/limiter"
+	"github.com/tempestteam/slack-mcp-server/pkg/provider/edge"
+	"github.com/tempestteam/slack-mcp-server/pkg/transport"
 	"github.com/rusq/slackdump/v3/auth"
 	"github.com/slack-go/slack"
 	"go.uber.org/zap"
@@ -24,7 +24,6 @@ import (
 
 const usersNotReadyMsg = "users cache is not ready yet, sync process is still running... please wait"
 const channelsNotReadyMsg = "channels cache is not ready yet, sync process is still running... please wait"
-const defaultUA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
 const defaultCacheTTL = 1 * time.Hour
 const defaultMinRefreshInterval = 30 * time.Second
 
@@ -290,7 +289,7 @@ func (c *MCPSlackClient) MarkConversationContext(ctx context.Context, channel, t
 }
 
 func (c *MCPSlackClient) GetConversationsContext(ctx context.Context, params *slack.GetConversationsParameters) ([]slack.Channel, string, error) {
-	// Please see https://github.com/korotovsky/slack-mcp-server/issues/73
+	// Please see https://github.com/tempestteam/slack-mcp-server/issues/73
 	// It seems that `conversations.list` works with `xoxp` tokens within Enterprise Grid setups
 	// and if `xoxc`/`xoxd` defined we fallback to edge client.
 	// In non Enterprise Grid setups we always use `conversations.list` api as it accepts both token types wtf.
@@ -866,9 +865,7 @@ func (ap *ApiProvider) GetSlackConnect(ctx context.Context) ([]slack.User, error
 			return nil, err
 		}
 
-		for _, u := range *usersInfo {
-			res = append(res, u)
-		}
+		res = append(res, *usersInfo...)
 	}
 
 	return res, nil

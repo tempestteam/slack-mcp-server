@@ -14,9 +14,9 @@ import (
 	"time"
 
 	"github.com/gocarina/gocsv"
-	"github.com/korotovsky/slack-mcp-server/pkg/provider"
-	"github.com/korotovsky/slack-mcp-server/pkg/server/auth"
-	"github.com/korotovsky/slack-mcp-server/pkg/text"
+	"github.com/tempestteam/slack-mcp-server/pkg/provider"
+	"github.com/tempestteam/slack-mcp-server/pkg/server/auth"
+	"github.com/tempestteam/slack-mcp-server/pkg/text"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/slack-go/slack"
 	slackGoUtil "github.com/takara2314/slack-go-util"
@@ -512,7 +512,7 @@ func (ch *ConversationsHandler) ConversationsSearchHandler(ctx context.Context, 
 	ch.logger.Debug("Search completed", zap.Int("matches", len(messagesRes.Matches)))
 
 	messages := ch.convertMessagesFromSearch(messagesRes.Matches)
-	if len(messages) > 0 && messagesRes.Pagination.Page < messagesRes.Pagination.PageCount {
+	if len(messages) > 0 && messagesRes.Pagination.Page < messagesRes.Pagination.PageCount { //nolint:staticcheck // QF1008 false positive - selector is ambiguous
 		nextCursor := fmt.Sprintf("page:%d", messagesRes.Pagination.Page+1)
 		messages[len(messages)-1].Cursor = base64.StdEncoding.EncodeToString([]byte(nextCursor))
 	}
@@ -678,7 +678,7 @@ func (ch *ConversationsHandler) convertMessagesFromSearch(slackMessages []slack.
 		userName, realName, ok := getUserInfo(msg.User, usersMap.Users)
 
 		if !ok && msg.User == "" && msg.Username != "" {
-			userName, realName, ok = getBotInfo(msg.Username)
+			userName, realName, _ = getBotInfo(msg.Username)
 		} else if !ok {
 			warn = true
 		}
@@ -1008,12 +1008,8 @@ func (ch *ConversationsHandler) paramFormatUser(raw string) (string, error) {
 		}
 		return fmt.Sprintf("<@%s>", u.ID), nil
 	}
-	if strings.HasPrefix(raw, "<@") {
-		raw = raw[2:]
-	}
-	if strings.HasPrefix(raw, "@") {
-		raw = raw[1:]
-	}
+	raw = strings.TrimPrefix(raw, "<@")
+	raw = strings.TrimPrefix(raw, "@")
 	uid, ok := users.UsersInv[raw]
 	if !ok {
 		return "", fmt.Errorf("user %q not found", raw)

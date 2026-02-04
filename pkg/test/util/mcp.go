@@ -37,7 +37,7 @@ func SetupMCP(cfg MCPConfig) (*MCPConnection, error) {
 		return nil, fmt.Errorf("could not get free port: %w", err)
 	}
 	tcpAddr := ln.Addr().(*net.TCPAddr)
-	ln.Close()
+	_ = ln.Close()
 
 	host := "127.0.0.1"
 	port := tcpAddr.Port

@@ -62,12 +62,12 @@ func TestGetCacheTTL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			oldVal := os.Getenv("SLACK_MCP_CACHE_TTL")
-			defer os.Setenv("SLACK_MCP_CACHE_TTL", oldVal)
+			defer func() { _ = os.Setenv("SLACK_MCP_CACHE_TTL", oldVal) }()
 
 			if tt.envValue == "" {
-				os.Unsetenv("SLACK_MCP_CACHE_TTL")
+				_ = os.Unsetenv("SLACK_MCP_CACHE_TTL")
 			} else {
-				os.Setenv("SLACK_MCP_CACHE_TTL", tt.envValue)
+				_ = os.Setenv("SLACK_MCP_CACHE_TTL", tt.envValue)
 			}
 
 			result := getCacheTTL()
@@ -81,7 +81,7 @@ func TestGetCacheTTL(t *testing.T) {
 func TestCacheExpiry(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", "slack-mcp-cache-expiry-test")
 	require.NoError(t, err)
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	t.Run("isCacheExpired returns correct result based on file mtime", func(t *testing.T) {
 		// This helper mirrors the logic in refreshChannelsInternal
@@ -367,12 +367,12 @@ func TestGetMinRefreshInterval(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			oldVal := os.Getenv("SLACK_MCP_MIN_REFRESH_INTERVAL")
-			defer os.Setenv("SLACK_MCP_MIN_REFRESH_INTERVAL", oldVal)
+			defer func() { _ = os.Setenv("SLACK_MCP_MIN_REFRESH_INTERVAL", oldVal) }()
 
 			if tt.envValue == "" {
-				os.Unsetenv("SLACK_MCP_MIN_REFRESH_INTERVAL")
+				_ = os.Unsetenv("SLACK_MCP_MIN_REFRESH_INTERVAL")
 			} else {
-				os.Setenv("SLACK_MCP_MIN_REFRESH_INTERVAL", tt.envValue)
+				_ = os.Setenv("SLACK_MCP_MIN_REFRESH_INTERVAL", tt.envValue)
 			}
 
 			result := getMinRefreshInterval()

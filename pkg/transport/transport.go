@@ -7,7 +7,6 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
@@ -15,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/korotovsky/slack-mcp-server/pkg/text"
+	"github.com/tempestteam/slack-mcp-server/pkg/text"
 	utls "github.com/refraction-networking/utls"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
@@ -148,7 +147,7 @@ func (t *uTLSTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if req.URL.Scheme == "https" {
 		tlsConn, err := t.establishTLS(conn, req.URL.Hostname())
 		if err != nil {
-			conn.Close()
+			_ = conn.Close()
 			return nil, fmt.Errorf("TLS error: %w", err)
 		}
 		conn = tlsConn
@@ -163,7 +162,7 @@ func (t *uTLSTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 				// Use HTTP/2 transport
 				clientConn, err := t.http2Transport.NewClientConn(conn)
 				if err != nil {
-					conn.Close()
+					_ = conn.Close()
 					return nil, fmt.Errorf("HTTP/2 client connection error: %w", err)
 				}
 				t.logger.Debug("Using HTTP/2 transport for request", zap.String("request", req.URL.String()))
@@ -177,18 +176,18 @@ func (t *uTLSTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 
 	err = req.Write(conn)
 	if err != nil {
-		conn.Close()
+		_ = conn.Close()
 		return nil, fmt.Errorf("request write error: %w", err)
 	}
 
 	resp, err := http.ReadResponse(bufio.NewReader(conn), req)
 	if err != nil {
-		conn.Close()
+		_ = conn.Close()
 		return nil, err
 	}
 
 	if resp.Close || resp.Header.Get("Connection") == "close" {
-		conn.Close()
+		_ = conn.Close()
 	}
 
 	return resp, nil
@@ -219,7 +218,7 @@ func (t *uTLSTransport) dialProxy(ctx context.Context, proxyURL *url.URL, target
 		tlsConn := tls.Client(conn, tlsConfig)
 		err = tlsConn.Handshake()
 		if err != nil {
-			conn.Close()
+			_ = conn.Close()
 			return nil, err
 		}
 		conn = tlsConn
@@ -240,20 +239,20 @@ func (t *uTLSTransport) dialProxy(ctx context.Context, proxyURL *url.URL, target
 
 	err = connectReq.Write(conn)
 	if err != nil {
-		conn.Close()
+		_ = conn.Close()
 		return nil, err
 	}
 
 	br := bufio.NewReader(conn)
 	resp, err := http.ReadResponse(br, connectReq)
 	if err != nil {
-		conn.Close()
+		_ = conn.Close()
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != 200 {
-		conn.Close()
+		_ = conn.Close()
 		return nil, fmt.Errorf("proxy returned status %d", resp.StatusCode)
 	}
 
@@ -363,7 +362,7 @@ func ProvideHTTPClient(cookies []*http.Cookie, logger *zap.Logger) *http.Client 
 	}
 
 	if localCertFile := os.Getenv("SLACK_MCP_SERVER_CA"); localCertFile != "" {
-		certs, err := ioutil.ReadFile(localCertFile)
+		certs, err := os.ReadFile(localCertFile)
 		if err != nil {
 			logger.Fatal("Failed to read local certificate file",
 				zap.String("cert_file", localCertFile),

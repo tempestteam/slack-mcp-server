@@ -60,7 +60,7 @@ func AttachmentsTo2CSV(msgText string, attachments []slack.Attachment) string {
 	for _, att := range attachments {
 		plainText := AttachmentToText(att)
 		if plainText != "" {
-			descriptions = append(descriptions, fmt.Sprintf("%s", plainText))
+			descriptions = append(descriptions, plainText)
 		}
 	}
 

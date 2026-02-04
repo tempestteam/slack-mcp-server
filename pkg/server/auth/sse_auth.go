@@ -52,9 +52,7 @@ func validateToken(ctx context.Context, logger *zap.Logger) (bool, error) {
 		zap.Bool("has_bearer_prefix", strings.HasPrefix(keyB, "Bearer ")),
 	)
 
-	if strings.HasPrefix(keyB, "Bearer ") {
-		keyB = strings.TrimPrefix(keyB, "Bearer ")
-	}
+	keyB = strings.TrimPrefix(keyB, "Bearer ")
 
 	if subtle.ConstantTimeCompare([]byte(keyA), []byte(keyB)) != 1 {
 		logger.Warn("Invalid auth token provided",

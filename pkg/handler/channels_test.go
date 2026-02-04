@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/korotovsky/slack-mcp-server/pkg/test/util"
+	"github.com/tempestteam/slack-mcp-server/pkg/test/util"
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/stretchr/testify/assert"
@@ -72,7 +72,7 @@ func setupTestEnv(t *testing.T) (*testEnv, func()) {
 
 	cleanup := func() {
 		cancel()
-		mcpClient.Close()
+		_ = mcpClient.Close()
 		fwd.Shutdown()
 		mcpServer.Shutdown()
 	}

@@ -271,7 +271,7 @@ func (cl *Client) ParseResponse(req any, r *http.Response) error {
 	if r.StatusCode < http.StatusOK || http.StatusMultipleChoices <= r.StatusCode {
 		return fmt.Errorf("error: status code: %s", r.Status)
 	}
-	defer r.Body.Close()
+	defer func() { _ = r.Body.Close() }()
 	bodyBytes, err := io.ReadAll(cl.recorder(r.Body))
 	if err != nil {
 		return err
@@ -324,7 +324,7 @@ func do(ctx context.Context, cl httpClient, req *http.Request) (*http.Response, 
 	}
 	if resp.StatusCode < http.StatusOK || http.StatusMultipleChoices <= resp.StatusCode {
 		body, _ := io.ReadAll(resp.Body)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		return nil, slack.StatusCodeError{Code: resp.StatusCode, Status: string(body)}
 	}
 	return resp, err
