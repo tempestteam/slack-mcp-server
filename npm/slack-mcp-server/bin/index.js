@@ -39,7 +39,7 @@ function resolveBinaryPath() {
     if (process.env.SLACK_MCP_DXT) {
         return require.resolve(path.join(__dirname, `${binary.name}${binary.suffix}`));
     } else {
-        return require.resolve(`${binary.name}/bin/${binary.name}${binary.suffix}`);
+        return require.resolve(`@tempestteam/${binary.name}/bin/${binary.name}${binary.suffix}`);
     }
 }
 
