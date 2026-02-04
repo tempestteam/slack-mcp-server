@@ -36,14 +36,8 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies
-        run: npm install -g @anthropic-ai/dxt
-
       - name: Build binaries
         run: make build-all-platforms
-
-      - name: Build DTX Extension
-        run: make build-dxt
 
       - name: Upload artifacts
         uses: softprops/action-gh-release@v2
@@ -53,9 +47,7 @@ jobs:
           files: |
             LICENSE
             build/slack-mcp-server-*
-            build/slack-mcp-server.dxt
             .env.dist
-            docker-compose.yml
 
       - name: Publish npm
         run: make npm-publish
