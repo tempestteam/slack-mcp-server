@@ -228,8 +228,8 @@ func (ch *ConversationsHandler) ConversationsAddMessageHandler(ctx context.Conte
 	if toolConfig == "1" || toolConfig == "true" || toolConfig == "yes" {
 		err := ch.apiProvider.Slack().MarkConversationContext(ctx, params.channel, respTimestamp)
 		if err != nil {
-			ch.logger.Error("Slack MarkConversationContext failed", zap.Error(err))
-			return nil, err
+			// Message was posted successfully, marking is optional - don't fail the operation
+			ch.logger.Warn("Slack MarkConversationContext failed after successful post", zap.Error(err))
 		}
 	}
 
@@ -243,8 +243,19 @@ func (ch *ConversationsHandler) ConversationsAddMessageHandler(ctx context.Conte
 	}
 	history, err := ch.apiProvider.Slack().GetConversationHistoryContext(ctx, &historyParams)
 	if err != nil {
-		ch.logger.Error("GetConversationHistoryContext failed", zap.Error(err))
-		return nil, err
+		// Message was posted successfully, but we couldn't fetch it back.
+		// This can happen when the user has write access but not read access to the channel.
+		// Return success as CSV with the info we have (consistent with normal return format).
+		ch.logger.Warn("GetConversationHistoryContext failed after successful post", zap.Error(err),
+			zap.String("channel", respChannel),
+			zap.String("timestamp", respTimestamp))
+		messages := []Message{{
+			MsgID:   respTimestamp,
+			Channel: respChannel,
+			Text:    params.text,
+			Time:    respTimestamp,
+		}}
+		return marshalMessagesToCSV(messages)
 	}
 	ch.logger.Debug("Fetched conversation history", zap.Int("message_count", len(history.Messages)))
 
